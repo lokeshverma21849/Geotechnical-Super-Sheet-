@@ -172,7 +172,7 @@ let raf=0;wrap.addEventListener("scroll",()=>{if(!raf)raf=requestAnimationFrame(
 new ResizeObserver(()=>{layout();draw()}).observe(wrap);
 try{data=JSON.parse(localStorage.getItem("ms")||"{}")}catch(_){}
 function loadLK(txt){try{const j=JSON.parse(txt);if(j.format!=="LOKESH"&&j.format!=="MSHEET")throw 0;push();data=j.cells||{};render();hint.textContent="File khul gayi"}catch(_){hint.textContent="Ye valid .lokesh file nahi hai"}}
-window.lkCheck=()=>{try{if(window.LK){const b=LK.take();if(b)loadLK(new TextDecoder().decode(Uint8Array.from(atob(b),c=>c.charCodeAt(0))))}}catch(_){}};
+window.lkCheck=async()=>{try{if(window.LK){const b=await LK.take();if(b)loadLK(new TextDecoder().decode(Uint8Array.from(atob(b),c=>c.charCodeAt(0))))}}catch(_){}};
 setTimeout(lkCheck,400);setTimeout(lkCheck,1500);
 layout();render();
 </script>
