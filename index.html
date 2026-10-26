@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MiniSheet</title>
+<style>
+:root{--bg:#fff;--fg:#1f2937;--hd:#f3f4f6;--bd:#d1d5db;--ac:#217346;--sel:#e6f4ea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1d21;--fg:#e5e7eb;--hd:#2a2d33;--bd:#3f434b;--sel:#1f3a2a;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#1b1d21;--fg:#e5e7eb;--hd:#2a2d33;--bd:#3f434b;--sel:#1f3a2a;color-scheme:dark}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--fg);font:16px system-ui,sans-serif;display:flex;flex-direction:column}
+.bar{display:flex;gap:6px;align-items:center;padding:6px;background:var(--hd);border-bottom:1px solid var(--bd);flex-wrap:wrap}
+button{background:var(--ac);color:#fff;border:0;border-radius:4px;padding:6px 10px;font-size:13px}
+.q{background:var(--bg);color:var(--fg);border:1px solid var(--bd);min-width:40px;padding:8px 10px;font-size:16px}
+#ref{width:96px;text-align:center;font-weight:600}
+#ref,#fx{padding:8px;font-size:16px;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:4px}
+#fx{flex:1;min-width:120px}
+#wrap{flex:1;min-height:0;overflow:auto;position:relative}
+#sp{position:relative}
+#vp{position:sticky;top:0;left:0;overflow:hidden;user-select:none;-webkit-user-select:none}
+.c,.h{position:absolute;box-sizing:border-box;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);white-space:nowrap;overflow:hidden}
+.c{width:100px;height:32px;line-height:31px;padding:0 4px;background:var(--bg);cursor:cell}
+.c.n{text-align:right}
+.c.m{background:var(--sel)}
+.c.s{outline:2px solid var(--ac);outline-offset:-2px;background:var(--sel)}
+.h{background:var(--hd);font-weight:600;text-align:center;z-index:2}
+.hc{top:0;width:100px;height:36px;line-height:35px}
+.hr{left:0;width:66px;height:32px;line-height:31px}
+.hk{left:0;top:0;width:66px;height:36px;z-index:3}
+</style>
+</head>
+<body>
+<div class="bar">
+<input id="ref" value="A1" title="Cell par jao: jaise XFD1048576">
+<input id="fx" placeholder="Cell chuno, yahan type karo, phir ✓ dabao">
+<button id="ok">✓</button>
+<button id="imp">Open</button>
+<button id="sv">Save .lokesh</button>
+<button id="exp">CSV Save</button>
+<button id="clr">Clear</button>
+<input type="file" id="file" hidden>
+</div>
+<div class="bar" id="qk"><button class="q" data-i="=">=</button><button class="q" data-i="SUM(">SUM</button><button class="q" data-i="AVERAGE(">AVG</button><button class="q" data-i="MIN(">MIN</button><button class="q" data-i="MAX(">MAX</button><button class="q" data-i="+">+</button><button class="q" data-i="-">−</button><button class="q" data-i="*">×</button><button class="q" data-i="/">÷</button><button class="q" data-i="^">^</button><button class="q" data-i="(">(</button><button class="q" data-i=")">)</button><button class="q" data-i=":">:</button><button class="q" data-i=",">,</button><button class="q" data-i="RQD(">RQD</button><button class="q" data-i="RQDCLASS(">RQD Cls</button><button class="q" data-i="CU(">Cu</button><button class="q" data-i="CC(">Cc</button><button class="q" data-i="SPTCN(">CN</button><button class="q" data-i="SPTN(">N corr</button><button class="q" data-i="SPTDIL(">N dil</button><button class="q" data-i="BCU(">qu</button><button class="q" id="rg">▭ Range</button><button class="q" id="undo">↶ Undo</button></div>
+<div id="hint" style="padding:3px 8px;font-size:13px;opacity:.8;min-height:18px"></div>
+<div id="wrap"><div id="sp"><div id="vp"></div></div></div>
+<script>
+const R=1048576,C=16384,RH=32,CW=100,HH=36,RW=66;
+let data={},sel=[0,0],ex=null,cache={},scale=1,U=[],fxA=false,fxCell=null,fxR=null,dirty=false,drag=false,moved=false,dragA=null,rangeMode=false,st=0;
+const colName=i=>{let s="";i++;while(i>0){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26)}return s};
+const parseCol=s=>{let n=0;for(const ch of s)n=n*26+ch.charCodeAt(0)-64;return n-1};
+const key=(r,c)=>colName(c)+(r+1);
+const parseRef=s=>{const m=/^([A-Z]+)(\d+)$/.exec(String(s).toUpperCase());if(!m)return null;const c=parseCol(m[1]),r=+m[2]-1;return r<0||r>=R||c<0||c>=C?null:[r,c]};
+const esc=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+const d2r=x=>x*Math.PI/180,num=a=>[].concat(a).flat().filter(x=>typeof x==="number");
+const FN={SUM:a=>a.reduce((x,y)=>x+y,0),AVERAGE:a=>a.length?FN.SUM(a)/a.length:0,MIN:a=>a.reduce((x,y)=>Math.min(x,y),Infinity),MAX:a=>a.reduce((x,y)=>Math.max(x,y),-Infinity),COUNT:a=>a.length,IF:(c,a,b)=>c?a:b};
+const G={SQRT:x=>Math.sqrt(x),ABS:x=>Math.abs(x),LN:x=>Math.log(x),LOG:x=>Math.log10(x),EXP:x=>Math.exp(x),POWER:(a,b)=>a**b,ROUND:(x,d=0)=>Math.round(x*10**d)/10**d,
+RQD:(p,run)=>Math.round(num(p).filter(x=>x>=10).reduce((a,b)=>a+b,0)/run*1000)/10,
+RQDCLASS:q=>q<25?"Very poor":q<50?"Poor":q<75?"Fair":q<90?"Good":"Excellent",
+CU:(a,b)=>a/b,CC:(a,b,c)=>a*a/(c*b),
+SPTCN:s=>Math.min(2,0.77*Math.log10(2000/s)),SPTN:(n,s)=>n*G.SPTCN(s),SPTDIL:n=>n>15?15+0.5*(n-15):n,
+BCU:(c,phi,g,B,Df)=>{const p=d2r(phi),Nq=Math.exp(Math.PI*Math.tan(p))*Math.tan(Math.PI/4+p/2)**2,Nc=phi?(Nq-1)/Math.tan(p):5.14,Ng=(Nq-1)*Math.tan(1.4*p);return c*Nc+g*Df*Nq+0.5*g*B*Ng}};
+const H={"RQD(":"RQD(piece_lengths_range, core_run_length) = % (pieces >= 10 cm)","RQDCLASS(":"RQDCLASS(rqd%) = rock quality","CU(":"CU(D60, D10) = uniformity coeff.","CC(":"CC(D30, D60, D10) = curvature coeff.","SPTCN(":"SPTCN(sigma_v kPa) = overburden factor CN (max 2)","SPTN(":"SPTN(N, sigma_v kPa) = N x CN","SPTDIL(":"SPTDIL(N) = dilatancy corr. (N above 15)","BCU(":"BCU(c kPa, phi deg, gamma kN/m3, B m, Df m) = strip footing qu (simplified)"};
+function rect(){const e=ex||sel;return[Math.min(sel[0],e[0]),Math.min(sel[1],e[1]),Math.max(sel[0],e[0]),Math.max(sel[1],e[1])]}
+function shiftF(v,dr,dc){return v.replace(/\b([A-Za-z]+)(\d+)\b/g,(m,L,n)=>{const cc=parseCol(L.toUpperCase())+dc,rr=+n+dr;return cc<0||cc>=C||rr<1||rr>R?"#REF":colName(cc)+rr})}
+async function saveFile(n,t,ty,vn){
+ const P=window.Capacitor&&Capacitor.Plugins;
+ if(P&&P.Filesystem&&P.Share){try{const r=await P.Filesystem.writeFile({path:n,data:t,directory:"CACHE",encoding:"utf8"});await P.Share.share({title:n,url:r.uri});hint.textContent="Share sheet khula: "+n;return}catch(e){if(/cancel/i.test((e&&e.message)||""))return;hint.textContent="Save error: "+((e&&e.message)||e);return}}
+ try{if(window.claude){const d=await claude.use("downloads");if(d){await d.save({filename:vn,data:t});hint.textContent="Saved: "+vn;return}}}catch(e){hint.textContent=(e&&e.code==="declined")?"Save cancel hua":"Save error: "+((e&&(e.code||e.message))||e);return}
+ try{const f=new File([t],n,{type:"application/octet-stream"});if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){await navigator.share({files:[f]});hint.textContent="Shared: "+n;return}}catch(e){if(e&&e.name==="AbortError")return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"application/octet-stream"}));a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},2000);hint.textContent="Download shuru: "+n}
+function RG(a,b,N){const A=parseRef(a),B=parseRef(b),o=[];if(!A||!B)return o;
+ const r0=Math.min(A[0],B[0]),r1=Math.max(A[0],B[0]),c0=Math.min(A[1],B[1]),c1=Math.max(A[1],B[1]);
+ const ok=k=>data[k]!==undefined&&data[k]!=="";
+ if((r1-r0+1)*(c1-c0+1)<=4000){for(let r=r0;r<=r1;r++)for(let c=c0;c<=c1;c++){const k=key(r,c);if(ok(k))o.push(N(k))}}
+ else for(const k of Object.keys(data)){const p=parseRef(k);if(p&&p[0]>=r0&&p[0]<=r1&&p[1]>=c0&&p[1]<=c1&&ok(k))o.push(N(k))}
+ return o}
+function val(k,stack=[]){
+ if(cache[k]!==undefined)return cache[k];
+ const raw=data[k];let v;
+ if(raw===undefined||raw==="")v="";
+ else if(raw[0]==="="){if(stack.includes(k))return "#CIRC";try{v=evalF(raw.slice(1),[...stack,k])}catch(e){v="#ERR"}}
+ else v=raw.trim()!==""&&!isNaN(raw)?+raw:raw;
+ cache[k]=v;return v}
+function evalF(f,stk){
+ let e=f.toUpperCase().replace(/\^/g,"**");
+ e=e.replace(/\b([A-Z]+\d+):([A-Z]+\d+)\b/g,"RG('$1','$2')");
+ e=e.replace(/\b([A-Z]+):([A-Z]+)\b/g,(m,a,b)=>"RG('"+a+"1','"+b+"1048576')");
+ e=e.replace(/\b([A-Z]+\d+)\b(?!')/g,"N('$1')");
+ e=e.replace(new RegExp("\\b("+Object.keys(FN).concat(Object.keys(G)).join("|")+")\\(","g"),"FN.$1(");
+ const N=k=>{const x=val(k,stk);return typeof x==="number"?x:(x===""?0:x)};
+ const F2={...FN};["SUM","AVERAGE","MIN","MAX","COUNT"].forEach(n=>F2[n]=(...a)=>FN[n](a.flat().filter(x=>typeof x==="number")));
+ Object.assign(F2,G);
+ const r=new Function("FN","N","RG","return ("+e+")")(F2,N,(a,b)=>RG(a,b,N));
+ return typeof r==="number"&&!isFinite(r)?"#ERR":r}
+function layout(){const vh=wrap.clientHeight,total=R*RH+HH,phys=Math.min(total,8e6);
+ sp.style.height=phys+"px";sp.style.width=(C*CW+RW)+"px";scale=phys>=total?1:(total-vh)/(phys-vh)}
+function draw(){
+ const vw=wrap.clientWidth,vh=wrap.clientHeight;vp.style.width=vw+"px";vp.style.height=vh+"px";
+ const tf=wrap.scrollTop*scale/RH,cf=wrap.scrollLeft/CW,r0=Math.floor(tf),c0=Math.floor(cf),oy=HH-(tf-r0)*RH,ox=RW-(cf-c0)*CW;
+ const nr=Math.ceil((vh-HH)/RH)+1,nc=Math.ceil((vw-RW)/CW)+1,rc=rect(),mu=rc[0]!==rc[2]||rc[1]!==rc[3];
+ let h="";
+ for(let i=0;i<nr&&r0+i<R;i++){const r=r0+i,y=oy+i*RH;
+  for(let j=0;j<nc&&c0+j<C;j++){const c=c0+j,v=val(key(r,c));
+   const cl="c"+(r===sel[0]&&c===sel[1]?" s":"")+(mu&&r>=rc[0]&&r<=rc[2]&&c>=rc[1]&&c<=rc[3]?" m":"")+(typeof v==="number"?" n":"");
+   h+='<div class="'+cl+'" data-r="'+r+'" data-c="'+c+'" style="left:'+(ox+j*CW)+'px;top:'+y+'px">'+esc(typeof v==="number"?+v.toFixed(6):v)+'</div>'}}
+ for(let j=0;j<nc&&c0+j<C;j++)h+='<div class="h hc" style="left:'+(ox+j*CW)+'px">'+colName(c0+j)+'</div>';
+ for(let i=0;i<nr&&r0+i<R;i++)h+='<div class="h hr" style="top:'+(oy+i*RH)+'px">'+(r0+i+1)+'</div>';
+ vp.innerHTML=h+'<div class="h hk"></div>'}
+function updBar(){const e=ex&&(ex[0]!==sel[0]||ex[1]!==sel[1]);if(document.activeElement!==ref)ref.value=key(...sel)+(e?":"+key(...ex):"");if(!fxA)fx.value=data[key(...sel)]||""}
+function selchg(){draw();updBar()}
+function render(){cache={};draw();updBar();clearTimeout(st);st=setTimeout(()=>{try{localStorage.setItem("ms",JSON.stringify(data))}catch(_){}},600)}
+function reveal(r,c){const vh=wrap.clientHeight,vw=wrap.clientWidth,vr=Math.max(1,Math.floor((vh-HH)/RH)),vc=Math.max(1,Math.floor((vw-RW)/CW)),tf=wrap.scrollTop*scale/RH,cf=wrap.scrollLeft/CW;
+ if(r<tf)wrap.scrollTop=r*RH/scale;else if(r+1>tf+vr)wrap.scrollTop=(r+1-vr)*RH/scale;
+ if(c<cf)wrap.scrollLeft=c*CW;else if(c+1>cf+vc)wrap.scrollLeft=(c+1-vc)*CW;draw()}
+function select(r,c){sel=[Math.max(0,Math.min(R-1,r)),Math.max(0,Math.min(C-1,c))];ex=null;selchg();reveal(...sel)}
+function undo(){if(U.length){data=JSON.parse(U.pop());render()}}
+const push=()=>{U.push(JSON.stringify(data));if(U.length>50)U.shift()};
+function pointing(){const b=fx.value.slice(0,fx.selectionStart);return fxA&&fx.value[0]==="="&&/[=(+\-*\/^,:]$/.test(b)}
+function ins(s){const a=fx.selectionStart,b=fx.selectionEnd;fx.value=fx.value.slice(0,a)+s+fx.value.slice(b);fx.focus();dirty=true;fx.setSelectionRange(a+s.length,a+s.length)}
+fx.oninput=()=>{dirty=true};
+fx.onfocus=()=>{fxA=true;fxCell=key(...sel);fxR=rect();dirty=false};
+fx.onblur=()=>{fxA=false;if(dirty&&fxCell)applyFx(fx.value)};
+function applyFx(v){push();const[a,b,c,d]=fxR,[ar,ac]=parseRef(fxCell);
+ for(let r=a;r<=c;r++)for(let k=b;k<=d;k++){const x=v[0]==="="?shiftF(v,r-ar,k-ac):v;if(x==="")delete data[key(r,k)];else data[key(r,k)]=x}
+ dirty=false;render()}
+fx.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();fx.blur();select(sel[0]+1,sel[1])}else if(e.key==="Escape"){dirty=false;fx.value=data[fxCell]||"";fx.blur()}};
+ref.onfocus=()=>ref.select();
+ref.onkeydown=e=>{if(e.key!=="Enter")return;const m=ref.value.toUpperCase().split(":"),p=parseRef(m[0]);if(!p)return;select(...p);const q=m[1]&&parseRef(m[1]);if(q){ex=q;selchg()}ref.blur()};
+vp.addEventListener("mousedown",e=>{moved=false;if(pointing()){e.preventDefault();return}const el=e.target.closest(".c");if(!el||e.button)return;const p=[+el.dataset.r,+el.dataset.c];if(e.shiftKey){ex=p;moved=true;selchg();e.preventDefault();return}drag=true;dragA=p});
+vp.addEventListener("mouseover",e=>{if(!drag)return;const el=e.target.closest(".c");if(!el)return;const p=[+el.dataset.r,+el.dataset.c];if(ex||p[0]!==dragA[0]||p[1]!==dragA[1]){sel=[...dragA];ex=p;moved=true;selchg()}});
+document.addEventListener("mouseup",()=>{drag=false});
+vp.addEventListener("click",e=>{const el=e.target.closest(".c");if(!el||moved)return;const r=+el.dataset.r,c=+el.dataset.c;
+ if(pointing()){ins(key(r,c));return}
+ if(rangeMode){ex=[r,c];selchg();return}
+ const same=r===sel[0]&&c===sel[1];select(r,c);if(same)fx.focus()});
+vp.addEventListener("dblclick",()=>fx.focus());
+qk.addEventListener("mousedown",e=>e.preventDefault());
+qk.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.id==="undo"){undo();return}
+ if(b.id==="rg"){rangeMode=!rangeMode;b.style.background=rangeMode?"var(--sel)":"";return}
+ if(!fxA){fx.focus();fx.setSelectionRange(fx.value.length,fx.value.length)}
+ const s=b.dataset.i;if(s.length>1&&fx.value==="")fx.value="=";ins(s);hint.textContent=H[s]||""});
+ok.onclick=()=>{fx.blur();select(sel[0]+1,sel[1])};
+document.addEventListener("keydown",e=>{
+ if(e.target.tagName==="INPUT")return;
+ const k=e.key;
+ if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==="z"){undo();e.preventDefault();return}
+ const mv={ArrowDown:[1,0],ArrowUp:[-1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[k];
+ if(mv){if(e.shiftKey){const b=ex||sel;ex=[Math.max(0,Math.min(R-1,b[0]+mv[0])),Math.max(0,Math.min(C-1,b[1]+mv[1]))];selchg();reveal(...ex)}else select(sel[0]+mv[0],sel[1]+mv[1])}
+ else if(k==="Delete"||k==="Backspace"){push();const[a,b,c,d]=rect();for(let r=a;r<=c;r++)for(let q=b;q<=d;q++)delete data[key(r,q)];render()}
+ else if(k==="Enter"||k==="F2"){fx.focus();fx.setSelectionRange(fx.value.length,fx.value.length)}
+ else if(k.length===1&&!e.ctrlKey&&!e.metaKey){fx.focus();fx.value=k;dirty=true}
+ else return;
+ e.preventDefault()});
+exp.onclick=()=>{
+ let mr=0,mc=0;Object.keys(data).forEach(k=>{const p=parseRef(k);if(p){mr=Math.max(mr,p[0]);mc=Math.max(mc,p[1])}});
+ if((mr+1)*(mc+1)>2000000){hint.textContent="Data bahut door door hai, CSV ke liye cells paas laao";return}
+ const rows=[];for(let r=0;r<=mr;r++){const row=[];for(let c=0;c<=mc;c++){const v=String(val(key(r,c)));row.push(/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v)}rows.push(row.join(","))}
+ saveFile("sheet.csv",rows.join("\n"),"text/csv","sheet.csv")};
+imp.onclick=()=>file.click();
+file.onchange=()=>{const f=file.files[0];if(!f)return;
+ f.text().then(txt=>{
+  if(/\.(lokesh|msheet|json)$/i.test(f.name)){try{const j=JSON.parse(txt);if(j.format!=="LOKESH"&&j.format!=="MSHEET")throw 0;push();data=j.cells||{};render()}catch(_){hint.textContent="Ye valid .lokesh file nahi hai"}return}
+  push();data={};
+  txt.split(/\r?\n/).forEach((line,r)=>{const cells=line.match(/("([^"]|"")*"|[^,]*)(,|$)/g)||[];
+   cells.forEach((s,c)=>{s=s.replace(/,$/,"");if(s[0]==='"')s=s.slice(1,-1).replace(/""/g,'"');if(s!==""&&r<R&&c<C)data[key(r,c)]=s})});
+  render()});file.value=""};
+clr.onclick=()=>{push();data={};render()};
+sv.onclick=()=>{const j={format:"LOKESH",version:1,app:"MiniSheet",saved:new Date().toISOString(),rows:R,cols:C,cells:data};saveFile("sheet.lokesh",JSON.stringify(j,null,1),"application/json","sheet.lokesh.json")};
+let raf=0;wrap.addEventListener("scroll",()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;draw()})});
+new ResizeObserver(()=>{layout();draw()}).observe(wrap);
+try{data=JSON.parse(localStorage.getItem("ms")||"{}")}catch(_){}
+layout();render();
+</script>
+</body>
+</html>
