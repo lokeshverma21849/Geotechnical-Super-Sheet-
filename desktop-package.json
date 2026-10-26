@@ -1,0 +1,22 @@
+{
+  "name": "minisheet-desktop",
+  "version": "1.0.0",
+  "description": "MiniSheet",
+  "main": "main.js",
+  "author": "Lokesh Kumar",
+  "devDependencies": {
+    "electron": "^31.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.lokesh.minisheet",
+    "productName": "MiniSheet",
+    "files": ["main.js", "preload.js", "www/**/*"],
+    "directories": { "output": "dist" },
+    "fileAssociations": [
+      { "ext": "lokesh", "name": "MiniSheet File", "description": "MiniSheet Lokesh File", "role": "Editor" }
+    ],
+    "win": { "target": ["nsis", "portable"] },
+    "nsis": { "oneClick": false, "allowToChangeInstallationDirectory": true }
+  }
+}
