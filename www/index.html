@@ -5,48 +5,89 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>MiniSheet</title>
 <style>
-:root{--bg:#fff;--fg:#1f2937;--hd:#f3f4f6;--bd:#d1d5db;--ac:#217346;--sel:#e6f4ea;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1d21;--fg:#e5e7eb;--hd:#2a2d33;--bd:#3f434b;--sel:#1f3a2a;color-scheme:dark}}
-:root[data-theme="dark"]{--bg:#1b1d21;--fg:#e5e7eb;--hd:#2a2d33;--bd:#3f434b;--sel:#1f3a2a;color-scheme:dark}
-html,body{height:100%;margin:0}
-body{background:var(--bg);color:var(--fg);font:16px system-ui,sans-serif;display:flex;flex-direction:column}
-.bar{display:flex;gap:6px;align-items:center;padding:6px;background:var(--hd);border-bottom:1px solid var(--bd);flex-wrap:wrap}
-button{background:var(--ac);color:#fff;border:0;border-radius:4px;padding:6px 10px;font-size:13px}
-.q{background:var(--bg);color:var(--fg);border:1px solid var(--bd);min-width:40px;padding:8px 10px;font-size:16px}
-#ref{width:96px;text-align:center;font-weight:600}
-#ref,#fx{padding:8px;font-size:16px;background:var(--bg);color:var(--fg);border:1px solid var(--bd);border-radius:4px}
-#fx{flex:1;min-width:120px}
-#wrap{flex:1;min-height:0;overflow:auto;position:relative}
+:root{--bg:#fff;--fg:#201f1e;--hd:#efefef;--bd:#d4d4d4;--ac:#217346;--sel:#e1efe6;--rb:#f3f2f1;--gl:#e1e1e1;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root{--bg:#1b1d21;--fg:#e5e7eb;--hd:#2a2d33;--bd:#3f434b;--sel:#1f3a2a;--rb:#25282d;--gl:#33373d;color-scheme:dark}}
+html,body{height:100%;margin:0;overflow:hidden}
+body{display:flex;flex-direction:column;font:13px "Segoe UI",system-ui,sans-serif;background:var(--bg);color:var(--fg)}
+button{font:inherit;cursor:pointer}
+#title{background:var(--ac);color:#fff;padding:4px 10px;display:flex;gap:10px;align-items:center;font-weight:600}
+.tb{background:none;border:0;color:#fff;font-size:16px;padding:2px 8px}
+#tabs{display:flex;background:var(--ac);overflow-x:auto;white-space:nowrap}
+#tabs button{background:none;color:#fff;border:0;padding:6px 16px;font-size:13px}
+#tabs button.on{background:var(--rb);color:var(--ac);font-weight:700}
+#rib{background:var(--rb);border-bottom:1px solid var(--bd);overflow-x:auto;min-height:74px}
+.pn{display:none;padding:4px}.pn.on{display:flex}
+.g{display:flex;flex-direction:column;border-right:1px solid var(--bd);padding:0 8px;min-width:max-content}
+.gi{display:grid;grid-auto-flow:column;grid-template-rows:repeat(2,auto);gap:2px;align-items:center;flex:1}
+.gn{font-size:11px;opacity:.7;text-align:center}
+.rb{background:var(--bg);color:var(--fg);border:1px solid transparent;border-radius:3px;padding:4px 8px;min-width:32px;position:relative}
+.rb:hover,.rb.on{border-color:var(--ac);background:var(--sel)}
+select{font:inherit;background:var(--bg);color:var(--fg);border:1px solid var(--bd);padding:3px}
+.cl input{position:absolute;opacity:0;width:0;height:0;left:0;top:0}
+#fb{display:flex;gap:4px;padding:3px 6px;border-bottom:1px solid var(--bd);align-items:center}
+#ref,#fx{padding:5px 6px;font-size:15px;background:var(--bg);color:var(--fg);border:1px solid var(--bd)}
+#ref{width:84px;text-align:center;font-weight:600}
+#fx{flex:1;min-width:80px}
+#ok{background:var(--ac);color:#fff;border:0;padding:6px 12px}
+#main{flex:1;min-height:0;position:relative}
+#wrap{position:absolute;inset:0;overflow:auto}
 #sp{position:relative}
 #vp{position:sticky;top:0;left:0;overflow:hidden;user-select:none;-webkit-user-select:none}
-.c,.h{position:absolute;box-sizing:border-box;border-right:1px solid var(--bd);border-bottom:1px solid var(--bd);white-space:nowrap;overflow:hidden}
-.c{width:100px;height:32px;line-height:31px;padding:0 4px;background:var(--bg);cursor:cell}
+.c,.h{position:absolute;box-sizing:border-box;border-right:1px solid var(--gl);border-bottom:1px solid var(--gl);white-space:nowrap;overflow:hidden}
+.ng .c{border-color:transparent}
+.c{width:90px;height:28px;line-height:27px;padding:0 4px;background:var(--bg);cursor:cell;font-size:14px}
 .c.n{text-align:right}
-.c.m{background:var(--sel)}
-.c.s{outline:2px solid var(--ac);outline-offset:-2px;background:var(--sel)}
-.h{background:var(--hd);font-weight:600;text-align:center;z-index:2}
-.hc{top:0;width:100px;height:36px;line-height:35px}
-.hr{left:0;width:66px;height:32px;line-height:31px}
-.hk{left:0;top:0;width:66px;height:36px;z-index:3}
+.c.m{background:var(--sel)!important}
+.c.s{outline:2px solid var(--ac);outline-offset:-2px}
+.h{background:var(--hd);font-weight:600;text-align:center;z-index:2;border-color:var(--bd)}
+.h.hs{background:#c6e0cf;color:#0b3d20}
+.hc{top:0;width:90px;height:26px;line-height:25px}
+.hr{left:0;width:56px;height:28px;line-height:27px}
+.hk{left:0;top:0;width:56px;height:26px;z-index:3}
+#ov{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.chart{position:absolute;width:320px;background:var(--bg);border:1px solid var(--bd);box-shadow:0 2px 8px #0004;pointer-events:auto}
+.chart .ch{background:var(--hd);padding:3px 6px;display:flex;justify-content:space-between;cursor:move;touch-action:none}
+.chart svg{display:block;width:100%}
+#bot{display:flex;border-top:1px solid var(--bd);background:var(--hd);align-items:center}
+#shs{flex:1;display:flex;overflow-x:auto;white-space:nowrap}
+.sh{background:none;border:0;border-right:1px solid var(--bd);padding:5px 14px;color:var(--fg)}
+.sh.on{background:var(--bg);color:var(--ac);font-weight:700;box-shadow:inset 0 -2px var(--ac)}
+#st{padding:0 10px;font-size:12px;text-align:right;max-width:55%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
 </style>
 </head>
 <body>
-<div class="bar">
-<input id="ref" value="A1" title="Cell par jao: jaise XFD1048576">
-<input id="fx" placeholder="Cell chuno, yahan type karo, phir ✓ dabao">
-<button id="ok">✓</button>
-<button id="imp">Open</button>
-<button id="sv">Save .lokesh</button>
-<button id="exp">CSV Save</button>
-<button id="clr">Clear</button>
-<input type="file" id="file" hidden>
+<div id="title"><b>▦ MiniSheet</b><span style="flex:1"></span><button class="tb" data-a="undo" title="Undo">↶</button><button class="tb" data-a="save" title="Save .lokesh">💾</button></div>
+<div id="tabs"><button data-t="File">File</button><button data-t="Home" class="on">Home</button><button data-t="Insert">Insert</button><button data-t="Formulas">Formulas</button><button data-t="View">View</button></div>
+<div id="rib">
+<div class="pn" data-p="File"><div class="g"><div class="gi"><button class="rb" data-a="new">📄 New</button><button class="rb" data-a="open">📂 Open</button><button class="rb" data-a="save">💾 Save .lokesh</button><button class="rb" data-a="csv">⬇ Save CSV</button></div><div class="gn">File</div></div></div>
+<div class="pn on" data-p="Home">
+<div class="g"><div class="gi"><button class="rb" data-a="paste">📋 Paste</button><button class="rb" data-a="cut">✂ Cut</button><button class="rb" data-a="copy">⧉ Copy</button></div><div class="gn">Clipboard</div></div>
+<div class="g"><div class="gi"><select id="fsz"><option>10</option><option selected>14</option><option>16</option><option>18</option><option>20</option><option>24</option></select><button class="rb" data-a="b"><b>B</b></button><button class="rb" data-a="i"><i>I</i></button><button class="rb" data-a="u"><u>U</u></button>
+<label class="rb cl" title="Fill color">▨ Fill<input type="color" id="fill" value="#ffff00"></label><label class="rb cl" title="Font color"><span style="color:#c00">A</span> Color<input type="color" id="fcol" value="#c00000"></label><button class="rb" data-a="bd">▦ Border</button><button class="rb" data-a="nobd">☐ None</button></div><div class="gn">Font</div></div>
+<div class="g"><div class="gi"><button class="rb" data-a="al-l">⇤</button><button class="rb" data-a="al-c">≡</button><button class="rb" data-a="al-r">⇥</button></div><div class="gn">Alignment</div></div>
+<div class="g"><div class="gi"><select id="nfm"><option value="">General</option><option value="n">Number</option><option value="c">Currency ₹</option><option value="p">Percent</option></select><span></span><button class="rb" data-a="dp+">.0+</button><button class="rb" data-a="dp-">.0−</button></div><div class="gn">Number</div></div>
+<div class="g"><div class="gi"><button class="rb" data-a="rowi">+ Row</button><button class="rb" data-a="coli">+ Col</button><button class="rb" data-a="rowd">− Row</button><button class="rb" data-a="cold">− Col</button></div><div class="gn">Cells</div></div>
+<div class="g"><div class="gi"><button class="rb" data-a="sum">Σ AutoSum</button><button class="rb" data-a="sortA">A→Z</button><button class="rb" data-a="clear">🧹 Clear</button><button class="rb" data-a="sortZ">Z→A</button></div><div class="gn">Editing</div></div>
 </div>
-<div class="bar" id="qk"><button class="q" data-i="=">=</button><button class="q" data-i="SUM(">SUM</button><button class="q" data-i="AVERAGE(">AVG</button><button class="q" data-i="MIN(">MIN</button><button class="q" data-i="MAX(">MAX</button><button class="q" data-i="+">+</button><button class="q" data-i="-">−</button><button class="q" data-i="*">×</button><button class="q" data-i="/">÷</button><button class="q" data-i="^">^</button><button class="q" data-i="(">(</button><button class="q" data-i=")">)</button><button class="q" data-i=":">:</button><button class="q" data-i=",">,</button><button class="q" data-i="RQD(">RQD</button><button class="q" data-i="RQDCLASS(">RQD Cls</button><button class="q" data-i="CU(">Cu</button><button class="q" data-i="CC(">Cc</button><button class="q" data-i="SPTCN(">CN</button><button class="q" data-i="SPTN(">N corr</button><button class="q" data-i="SPTDIL(">N dil</button><button class="q" data-i="BCU(">qu</button><button class="q" id="rg">▭ Range</button><button class="q" id="undo">↶ Undo</button></div>
-<div id="hint" style="padding:3px 8px;font-size:13px;opacity:.8;min-height:18px"></div>
-<div id="wrap"><div id="sp"><div id="vp"></div></div></div>
+<div class="pn" data-p="Insert">
+<div class="g"><div class="gi"><button class="rb" data-a="table">▤ Table</button></div><div class="gn">Tables</div></div>
+<div class="g"><div class="gi"><button class="rb" data-a="ch-col">📊 Column</button><button class="rb" data-a="ch-line">📈 Line</button><button class="rb" data-a="ch-pie">🥧 Pie</button></div><div class="gn">Charts (range select karo)</div></div>
+</div>
+<div class="pn" data-p="Formulas">
+<div class="g"><div class="gi"><button class="rb" data-a="sum">Σ AutoSum</button><button class="rb" data-i="SUM(">SUM</button><button class="rb" data-i="AVERAGE(">AVERAGE</button><button class="rb" data-i="MIN(">MIN</button><button class="rb" data-i="MAX(">MAX</button><button class="rb" data-i="COUNT(">COUNT</button><button class="rb" data-i="IF(">IF</button><button class="rb" data-i="ROUND(">ROUND</button></div><div class="gn">Function Library</div></div>
+<div class="g"><div class="gi"><button class="rb" data-i="RQD(">RQD</button><button class="rb" data-i="RQDCLASS(">RQD Class</button><button class="rb" data-i="CU(">Cu</button><button class="rb" data-i="CC(">Cc</button><button class="rb" data-i="SPTCN(">CN</button><button class="rb" data-i="SPTN(">N corr</button><button class="rb" data-i="SPTDIL(">N dil</button><button class="rb" data-i="BCU(">qu</button></div><div class="gn">Geotechnical</div></div>
+<div class="g"><div class="gi"><button class="rb" data-i="=">=</button><button class="rb" data-i="+">+</button><button class="rb" data-i="-">−</button><button class="rb" data-i="*">×</button><button class="rb" data-i="/">÷</button><button class="rb" data-i="^">^</button><button class="rb" data-i="(">(</button><button class="rb" data-i=")">)</button><button class="rb" data-i=":">:</button><button class="rb" data-i=",">,</button><button class="rb" data-a="rg">▭ Range</button><button class="rb" data-a="undo">↶ Undo</button></div><div class="gn">Formula likhna</div></div>
+</div>
+<div class="pn" data-p="View"><div class="g"><div class="gi"><button class="rb on" data-a="grid">▦ Gridlines</button></div><div class="gn">Show</div></div></div>
+</div>
+<div id="fb"><input id="ref" value="A1" title="Name box: cell par jao"><span style="font-style:italic;font-weight:700">fx</span><input id="fx" placeholder="Cell chuno, yahan type karo, phir ✓ dabao"><button id="ok">✓</button></div>
+<div id="main"><div id="wrap"><div id="sp"><div id="vp"></div></div></div><div id="ov"></div></div>
+<div id="bot"><div id="shs"></div><div id="st"><span id="hint"></span> <span id="stat"></span></div></div>
+<input type="file" id="file" hidden>
 <script>
-const R=1048576,C=16384,RH=32,CW=100,HH=36,RW=66;
-let data={},sel=[0,0],ex=null,cache={},scale=1,U=[],fxA=false,fxCell=null,fxR=null,dirty=false,drag=false,moved=false,dragA=null,rangeMode=false,st=0;
+const R=1048576,C=16384,RH=28,CW=90,HH=26,RW=56;
+let S=[{n:"Sheet1",d:{},f:{},t:[],c:[]}],cur=0,data=S[0].d,fmt=S[0].f,tables=S[0].t,charts=S[0].c;
+let sel=[0,0],ex=null,cache={},scale=1,U=[],fxA=false,fxCell=null,fxR=null,dirty=false,drag=false,moved=false,dragA=null,rangeMode=false,svT=0,clip=null,gridOn=true;
 const colName=i=>{let s="";i++;while(i>0){const m=(i-1)%26;s=String.fromCharCode(65+m)+s;i=Math.floor((i-1)/26)}return s};
 const parseCol=s=>{let n=0;for(const ch of s)n=n*26+ch.charCodeAt(0)-64;return n-1};
 const key=(r,c)=>colName(c)+(r+1);
@@ -62,13 +103,16 @@ SPTCN:s=>Math.min(2,0.77*Math.log10(2000/s)),SPTN:(n,s)=>n*G.SPTCN(s),SPTDIL:n=>
 BCU:(c,phi,g,B,Df)=>{const p=d2r(phi),Nq=Math.exp(Math.PI*Math.tan(p))*Math.tan(Math.PI/4+p/2)**2,Nc=phi?(Nq-1)/Math.tan(p):5.14,Ng=(Nq-1)*Math.tan(1.4*p);return c*Nc+g*Df*Nq+0.5*g*B*Ng}};
 const H={"RQD(":"RQD(piece_lengths_range, core_run_length) = % (pieces >= 10 cm)","RQDCLASS(":"RQDCLASS(rqd%) = rock quality","CU(":"CU(D60, D10) = uniformity coeff.","CC(":"CC(D30, D60, D10) = curvature coeff.","SPTCN(":"SPTCN(sigma_v kPa) = overburden factor CN (max 2)","SPTN(":"SPTN(N, sigma_v kPa) = N x CN","SPTDIL(":"SPTDIL(N) = dilatancy corr. (N above 15)","BCU(":"BCU(c kPa, phi deg, gamma kN/m3, B m, Df m) = strip footing qu (simplified)"};
 function rect(){const e=ex||sel;return[Math.min(sel[0],e[0]),Math.min(sel[1],e[1]),Math.max(sel[0],e[0]),Math.max(sel[1],e[1])]}
+const area=()=>{const[a,b,c,d]=rect();return(c-a+1)*(d-b+1)};
+function eachRect(fn,sparse){const[a,b,c,d]=rect();if(!sparse||area()<=20000){for(let r=a;r<=c;r++)for(let k=b;k<=d;k++)fn(key(r,k),r,k);return}
+ for(const k of new Set([...Object.keys(data),...Object.keys(fmt)])){const p=parseRef(k);if(p&&p[0]>=a&&p[0]<=c&&p[1]>=b&&p[1]<=d)fn(k,p[0],p[1])}}
 function shiftF(v,dr,dc){return v.replace(/\b([A-Za-z]+)(\d+)\b/g,(m,L,n)=>{const cc=parseCol(L.toUpperCase())+dc,rr=+n+dr;return cc<0||cc>=C||rr<1||rr>R?"#REF":colName(cc)+rr})}
+const say=t=>{hint.textContent=t};
 async function saveFile(n,t,ty,vn){
  const P=window.Capacitor&&Capacitor.Plugins;
- if(P&&P.Filesystem&&P.Share){try{const r=await P.Filesystem.writeFile({path:n,data:t,directory:"CACHE",encoding:"utf8"});await P.Share.share({title:n,url:r.uri});hint.textContent="Share sheet khula: "+n;return}catch(e){if(/cancel/i.test((e&&e.message)||""))return;hint.textContent="Save error: "+((e&&e.message)||e);return}}
- try{if(window.claude){const d=await claude.use("downloads");if(d){await d.save({filename:vn,data:t});hint.textContent="Saved: "+vn;return}}}catch(e){hint.textContent=(e&&e.code==="declined")?"Save cancel hua":"Save error: "+((e&&(e.code||e.message))||e);return}
- try{const f=new File([t],n,{type:"application/octet-stream"});if(navigator.canShare&&navigator.canShare({files:[f]})&&/Android|iPhone|iPad/i.test(navigator.userAgent)){await navigator.share({files:[f]});hint.textContent="Shared: "+n;return}}catch(e){if(e&&e.name==="AbortError")return}
- const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"application/octet-stream"}));a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},2000);hint.textContent="Download shuru: "+n}
+ if(P&&P.Filesystem&&P.Share){try{const r=await P.Filesystem.writeFile({path:n,data:t,directory:"CACHE",encoding:"utf8"});await P.Share.share({title:n,url:r.uri});say("Share sheet khula: "+n);return}catch(e){if(/cancel/i.test((e&&e.message)||""))return;say("Save error: "+((e&&e.message)||e));return}}
+ try{if(window.claude){const d=await claude.use("downloads");if(d){await d.save({filename:vn,data:t});say("Saved: "+vn);return}}}catch(e){say("Save error: "+((e&&(e.code||e.message))||e));return}
+ const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"application/octet-stream"}));a.download=n;document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},2000);say("Download shuru: "+n)}
 function RG(a,b,N){const A=parseRef(a),B=parseRef(b),o=[];if(!A||!B)return o;
  const r0=Math.min(A[0],B[0]),r1=Math.max(A[0],B[0]),c0=Math.min(A[1],B[1]),c1=Math.max(A[1],B[1]);
  const ok=k=>data[k]!==undefined&&data[k]!=="";
@@ -93,6 +137,13 @@ function evalF(f,stk){
  Object.assign(F2,G);
  const r=new Function("FN","N","RG","return ("+e+")")(F2,N,(a,b)=>RG(a,b,N));
  return typeof r==="number"&&!isFinite(r)?"#ERR":r}
+function disp(v,k){if(typeof v!=="number")return String(v);const f=fmt[k]||{},dp=f.dp,o={minimumFractionDigits:dp??2,maximumFractionDigits:dp??2};
+ if(f.nf==="p")return(v*100).toFixed(dp??2)+"%";if(f.nf==="c")return"₹"+v.toLocaleString("en-IN",o);if(f.nf==="n")return v.toLocaleString("en-IN",o);
+ return dp!=null?v.toFixed(dp):String(+v.toFixed(6))}
+function cs(k,r,c){const f=fmt[k]||{};let bg=f.bg,fg=f.fg,b=f.b;
+ for(const t of tables)if(r>=t.r0&&r<=t.r1&&c>=t.c0&&c<=t.c1){if(r===t.r0){bg=bg||"#217346";fg=fg||"#fff";b=true}else if(!bg)bg=(r-t.r0)%2?"#e2efda":"#fff"}
+ if(bg&&!fg)fg="#201f1e";
+ return(b?"font-weight:700;":"")+(f.i?"font-style:italic;":"")+(f.u?"text-decoration:underline;":"")+(fg?"color:"+fg+";":"")+(bg?"background:"+bg+";":"")+(f.al?"text-align:"+f.al+";":"")+(f.bd?"border:1px solid #000;":"")+(f.fs?"font-size:"+f.fs+"px;":"")}
 function layout(){const vh=wrap.clientHeight,total=R*RH+HH,phys=Math.min(total,8e6);
  sp.style.height=phys+"px";sp.style.width=(C*CW+RW)+"px";scale=phys>=total?1:(total-vh)/(phys-vh)}
 function draw(){
@@ -101,80 +152,158 @@ function draw(){
  const nr=Math.ceil((vh-HH)/RH)+1,nc=Math.ceil((vw-RW)/CW)+1,rc=rect(),mu=rc[0]!==rc[2]||rc[1]!==rc[3];
  let h="";
  for(let i=0;i<nr&&r0+i<R;i++){const r=r0+i,y=oy+i*RH;
-  for(let j=0;j<nc&&c0+j<C;j++){const c=c0+j,v=val(key(r,c));
-   const cl="c"+(r===sel[0]&&c===sel[1]?" s":"")+(mu&&r>=rc[0]&&r<=rc[2]&&c>=rc[1]&&c<=rc[3]?" m":"")+(typeof v==="number"?" n":"");
-   h+='<div class="'+cl+'" data-r="'+r+'" data-c="'+c+'" style="left:'+(ox+j*CW)+'px;top:'+y+'px">'+esc(typeof v==="number"?+v.toFixed(6):v)+'</div>'}}
- for(let j=0;j<nc&&c0+j<C;j++)h+='<div class="h hc" style="left:'+(ox+j*CW)+'px">'+colName(c0+j)+'</div>';
- for(let i=0;i<nr&&r0+i<R;i++)h+='<div class="h hr" style="top:'+(oy+i*RH)+'px">'+(r0+i+1)+'</div>';
- vp.innerHTML=h+'<div class="h hk"></div>'}
-function updBar(){const e=ex&&(ex[0]!==sel[0]||ex[1]!==sel[1]);if(document.activeElement!==ref)ref.value=key(...sel)+(e?":"+key(...ex):"");if(!fxA)fx.value=data[key(...sel)]||""}
+  for(let j=0;j<nc&&c0+j<C;j++){const c=c0+j,k=key(r,c),v=val(k),f=fmt[k];
+   const cl="c"+(r===sel[0]&&c===sel[1]?" s":"")+(mu&&r>=rc[0]&&r<=rc[2]&&c>=rc[1]&&c<=rc[3]?" m":"")+(typeof v==="number"&&!(f&&f.al)?" n":"");
+   h+='<div class="'+cl+'" data-r="'+r+'" data-c="'+c+'" style="left:'+(ox+j*CW)+'px;top:'+y+'px;'+cs(k,r,c)+'">'+esc(disp(v,k))+'</div>'}}
+ for(let j=0;j<nc&&c0+j<C;j++){const c=c0+j;h+='<div class="h hc'+(c>=rc[1]&&c<=rc[3]?' hs':'')+'" data-hc="'+c+'" style="left:'+(ox+j*CW)+'px">'+colName(c)+'</div>'}
+ for(let i=0;i<nr&&r0+i<R;i++){const r=r0+i;h+='<div class="h hr'+(r>=rc[0]&&r<=rc[2]?' hs':'')+'" data-hr="'+r+'" style="top:'+(oy+i*RH)+'px">'+(r+1)+'</div>'}
+ vp.classList.toggle("ng",!gridOn);vp.innerHTML=h+'<div class="h hk"></div>'}
+function updBar(){const e=ex&&(ex[0]!==sel[0]||ex[1]!==sel[1]);if(document.activeElement!==ref)ref.value=key(...sel)+(e?":"+key(...ex):"");if(!fxA)fx.value=data[key(...sel)]||"";
+ let n=0,s=0;if(e||true)eachRect(k=>{const v=val(k);if(typeof v==="number"){n++;s+=v}},true);
+ stat.textContent=e&&n?"Average: "+(+(s/n).toFixed(4))+"   Count: "+n+"   Sum: "+(+s.toFixed(4)):""}
 function selchg(){draw();updBar()}
-function render(){cache={};draw();updBar();clearTimeout(st);st=setTimeout(()=>{try{localStorage.setItem("ms",JSON.stringify(data))}catch(_){}},600)}
+function sync(){const s=S[cur];s.d=data;s.f=fmt;s.t=tables;s.c=charts}
+function payload(){sync();return{format:"LOKESH",version:2,app:"MiniSheet",saved:new Date().toISOString(),sheets:S.map(s=>({name:s.n,cells:s.d,fmt:s.f,tables:s.t,charts:s.c}))}}
+function render(){cache={};draw();updBar();renderCharts();clearTimeout(svT);svT=setTimeout(()=>{try{localStorage.setItem("ms2",JSON.stringify(payload()))}catch(_){}},600)}
+function bind(){data=S[cur].d;fmt=S[cur].f;tables=S[cur].t;charts=S[cur].c}
+function useSheet(i){sync();cur=i;bind();sel=[0,0];ex=null;U=[];wrap.scrollTop=0;wrap.scrollLeft=0;drawTabs();render()}
+function drawTabs(){shs.innerHTML=S.map((s,i)=>'<button class="sh'+(i===cur?' on':'')+'" data-si="'+i+'">'+esc(s.n)+'</button>').join("")+'<button class="sh" data-add="1">＋</button>'}
+shs.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;if(b.dataset.add){sync();S.push({n:"Sheet"+(S.length+1),d:{},f:{},t:[],c:[]});useSheet(S.length-1)}else useSheet(+b.dataset.si)});
+shs.addEventListener("dblclick",e=>{const b=e.target.closest("[data-si]");if(!b)return;const i=+b.dataset.si,n=prompt("Sheet ka naam",S[i].n);if(n){S[i].n=n.slice(0,30);drawTabs();render()}});
+shs.addEventListener("contextmenu",e=>{const b=e.target.closest("[data-si]");if(!b)return;e.preventDefault();if(S.length>1&&confirm("Ye sheet delete karni hai?")){S.splice(+b.dataset.si,1);cur=Math.min(cur,S.length-1);bind();drawTabs();render()}});
+const snap=()=>JSON.stringify([data,fmt,tables]);
+const push=()=>{U.push(snap());if(U.length>50)U.shift()};
+function undo(){if(U.length){const[d,f,t]=JSON.parse(U.pop());data=d;fmt=f;tables=t;sync();render()}}
 function reveal(r,c){const vh=wrap.clientHeight,vw=wrap.clientWidth,vr=Math.max(1,Math.floor((vh-HH)/RH)),vc=Math.max(1,Math.floor((vw-RW)/CW)),tf=wrap.scrollTop*scale/RH,cf=wrap.scrollLeft/CW;
  if(r<tf)wrap.scrollTop=r*RH/scale;else if(r+1>tf+vr)wrap.scrollTop=(r+1-vr)*RH/scale;
  if(c<cf)wrap.scrollLeft=c*CW;else if(c+1>cf+vc)wrap.scrollLeft=(c+1-vc)*CW;draw()}
 function select(r,c){sel=[Math.max(0,Math.min(R-1,r)),Math.max(0,Math.min(C-1,c))];ex=null;selchg();reveal(...sel)}
-function undo(){if(U.length){data=JSON.parse(U.pop());render()}}
-const push=()=>{U.push(JSON.stringify(data));if(U.length>50)U.shift()};
 function pointing(){const b=fx.value.slice(0,fx.selectionStart);return fxA&&fx.value[0]==="="&&/[=(+\-*\/^,:]$/.test(b)}
 function ins(s){const a=fx.selectionStart,b=fx.selectionEnd;fx.value=fx.value.slice(0,a)+s+fx.value.slice(b);fx.focus();dirty=true;fx.setSelectionRange(a+s.length,a+s.length)}
 fx.oninput=()=>{dirty=true};
 fx.onfocus=()=>{fxA=true;fxCell=key(...sel);fxR=rect();dirty=false};
 fx.onblur=()=>{fxA=false;if(dirty&&fxCell)applyFx(fx.value)};
-function applyFx(v){push();const[a,b,c,d]=fxR,[ar,ac]=parseRef(fxCell);
+function applyFx(v){if((fxR[2]-fxR[0]+1)*(fxR[3]-fxR[1]+1)>50000){say("Selection bahut badi hai");dirty=false;return}push();const[a,b,c,d]=fxR,[ar,ac]=parseRef(fxCell);
  for(let r=a;r<=c;r++)for(let k=b;k<=d;k++){const x=v[0]==="="?shiftF(v,r-ar,k-ac):v;if(x==="")delete data[key(r,k)];else data[key(r,k)]=x}
  dirty=false;render()}
 fx.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();fx.blur();select(sel[0]+1,sel[1])}else if(e.key==="Escape"){dirty=false;fx.value=data[fxCell]||"";fx.blur()}};
 ref.onfocus=()=>ref.select();
 ref.onkeydown=e=>{if(e.key!=="Enter")return;const m=ref.value.toUpperCase().split(":"),p=parseRef(m[0]);if(!p)return;select(...p);const q=m[1]&&parseRef(m[1]);if(q){ex=q;selchg()}ref.blur()};
+function applyFmt(o){if(area()>50000){say("Selection bahut badi hai (max 50,000 cells)");return}push();
+ eachRect(k=>{const f={...(fmt[k]||{}),...o};for(const x in f)if(f[x]===undefined||f[x]===false||f[x]===""||(x==="bd"&&!f[x]))delete f[x];if(Object.keys(f).length)fmt[k]=f;else delete fmt[k]});render()}
+function dpAdj(d){const f=fmt[key(...sel)]||{};applyFmt({dp:Math.max(0,(f.dp??(f.nf?2:0))+d)})}
+function doCopy(cut){if(area()>50000){say("Selection bahut badi hai");return}const[a,b,c,d]=rect(),cells=[],tsv=[];
+ for(let r=a;r<=c;r++){const row=[],t=[];for(let k=b;k<=d;k++){const kk=key(r,k);row.push([data[kk],fmt[kk]]);t.push(String(val(kk)))}cells.push(row);tsv.push(t.join("\t"))}
+ clip={a,b,c,d,cells,cut,tsv:tsv.join("\n")};try{navigator.clipboard.writeText(clip.tsv)}catch(_){}say(cut?"Cut ho gaya, paste karo":"Copy ho gaya")}
+function pasteClip(){push();const dr=sel[0]-clip.a,dc=sel[1]-clip.b;
+ if(clip.cut)for(let r=clip.a;r<=clip.c;r++)for(let k=clip.b;k<=clip.d;k++){delete data[key(r,k)];delete fmt[key(r,k)]}
+ clip.cells.forEach((row,i)=>row.forEach((cell,j)=>{const r=sel[0]+i,c=sel[1]+j;if(r>=R||c>=C)return;const kk=key(r,c);
+  if(cell[0]===undefined)delete data[kk];else data[kk]=cell[0][0]==="="?shiftF(cell[0],dr,dc):cell[0];
+  if(cell[1])fmt[kk]={...cell[1]};else delete fmt[kk]}));
+ if(clip.cut)clip=null;render()}
+function pasteText(t){if(!t)return;push();t.replace(/\r/g,"").replace(/\n$/,"").split("\n").forEach((line,i)=>line.split("\t").forEach((s,j)=>{const r=sel[0]+i,c=sel[1]+j;if(r<R&&c<C){if(s==="")delete data[key(r,c)];else data[key(r,c)]=s}}));render()}
+function doPaste(){if(clip)pasteClip();else try{navigator.clipboard.readText().then(pasteText).catch(()=>say("Ctrl+V ya long-press se paste karo"))}catch(_){say("Ctrl+V se paste karo")}}
+document.addEventListener("paste",e=>{if(e.target.tagName==="INPUT")return;e.preventDefault();const t=e.clipboardData.getData("text/plain");if(clip&&t===clip.tsv)pasteClip();else pasteText(t)});
+function shiftAxis(ax,idx,d){push();
+ const mk=k=>{const p=parseRef(k);if(!p||p[ax]<idx)return k;if(d<0&&p[ax]===idx)return null;p[ax]+=d;return p[ax]<0||p[ax]>=(ax?C:R)?null:key(p[0],p[1])};
+ const adj=v=>v[0]==="="?v.replace(/\b([A-Za-z]+)(\d+)\b/g,(m,L,n)=>{const p=[+n-1,parseCol(L.toUpperCase())];if(p[ax]<idx)return m;if(d<0&&p[ax]===idx)return"#REF";p[ax]+=d;return colName(p[1])+(p[0]+1)}):v;
+ const nd={},nf={};for(const k in data){const q=mk(k);if(q)nd[q]=adj(data[k])}for(const k in fmt){const q=mk(k);if(q)nf[q]=fmt[k]}
+ data=nd;fmt=nf;sync();render()}
+function axisOp(ax,d){const r=rect(),s=r[ax],n=Math.min(1000,r[ax+2]-r[ax]+1);for(let i=0;i<n;i++)shiftAxis(ax,s,d)}
+function clearSel(all){push();eachRect(k=>{delete data[k];if(all)delete fmt[k]},true);render()}
+function sortSel(asc){if(area()>50000){say("Selection bahut badi hai");return}const[a,b,c,d]=rect();push();const rows=[];
+ for(let r=a;r<=c;r++){const row=[];for(let k=b;k<=d;k++){const kk=key(r,k);row.push([data[kk],fmt[kk]])}rows.push(row)}
+ const kv=row=>{const w=row[0][0];if(w===undefined||w==="")return[2,0];return w.trim()!==""&&!isNaN(w)?[0,+w]:[1,String(w).toLowerCase()]};
+ rows.sort((x,y)=>{const p=kv(x),q=kv(y);if(p[0]!==q[0])return p[0]-q[0];const m=p[1]<q[1]?-1:p[1]>q[1]?1:0;return asc?m:-m});
+ rows.forEach((row,i)=>row.forEach((cell,j)=>{const kk=key(a+i,b+j);if(cell[0]===undefined)delete data[kk];else data[kk]=cell[0];if(cell[1])fmt[kk]=cell[1];else delete fmt[kk]}));render()}
+function autoSum(){const[r,c]=sel;let k=r-1;while(k>=0&&typeof val(key(k,c))==="number")k--;let f;
+ if(k<r-1)f="=SUM("+key(k+1,c)+":"+key(r-1,c)+")";else{let j=c-1;while(j>=0&&typeof val(key(r,j))==="number")j--;if(j<c-1)f="=SUM("+key(r,j+1)+":"+key(r,c-1)+")"}
+ if(f){push();data[key(r,c)]=f;render()}else{fx.focus();fx.value="=SUM(";dirty=true}}
+function addTable(){if(area()<2){say("Pehle range select karo (header row ke saath)");return}const[a,b,c,d]=rect();push();
+ const i=tables.findIndex(t=>t.r0===a&&t.c0===b&&t.r1===c&&t.c1===d);if(i>=0)tables.splice(i,1);else tables.push({r0:a,c0:b,r1:c,c1:d});render()}
+function addChart(type){if(area()<2){say("Pehle range select karo (pehla column labels)");return}charts.push({type,rect:rect(),x:20+charts.length*24,y:10+charts.length*24});sync();render()}
+const PAL=["#4472c4","#ed7d31","#a5a5a5","#ffc000","#5b9bd5","#70ad47"];
+function chartSVG(ch){const[a,b,c,d]=ch.rect,rows=[];for(let r=a;r<=c;r++){const row=[];for(let k=b;k<=d;k++)row.push(val(key(r,k)));rows.push(row)}
+ const one=d===b;if(!one&&rows[0].slice(1).some(x=>typeof x!=="number"))rows.shift();
+ const lab=rows.map((r,i)=>one?String(i+1):String(r[0])),ser=[];for(let s=one?0:1;s<=d-b;s++)ser.push(rows.map(r=>typeof r[s]==="number"?r[s]:0));
+ if(!ser.length||!rows.length)return"<div style='padding:10px'>Range mein numbers chahiye</div>";
+ const W=320,Hh=200,L=40,B=24,T=10,n=rows.length,mx=Math.max(1,...ser.flat()),iw=W-L-6,ih=Hh-B-T;let s='<svg viewBox="0 0 '+W+' '+Hh+'">';
+ if(ch.type==="pie"){const tot=ser[0].reduce((x,y)=>x+Math.max(0,y),0)||1;let ang=-Math.PI/2;ser[0].forEach((v,i)=>{const a2=ang+Math.max(0,v)/tot*2*Math.PI,x1=160+80*Math.cos(ang),y1=100+80*Math.sin(ang),x2=160+80*Math.cos(a2),y2=100+80*Math.sin(a2);s+='<path d="M160 100L'+x1+' '+y1+'A80 80 0 '+(a2-ang>Math.PI?1:0)+' 1 '+x2+' '+y2+'Z" fill="'+PAL[i%6]+'"/>';ang=a2});return s+'</svg>'}
+ for(let g=0;g<=4;g++){const y=T+ih-ih*g/4;s+='<line x1="'+L+'" x2="'+W+'" y1="'+y+'" y2="'+y+'" stroke="#8884" /><text x="2" y="'+(y+4)+'" font-size="10" fill="currentColor">'+(+(mx*g/4).toPrecision(3))+'</text>'}
+ const bw=iw/n;ser.forEach((sv,si)=>{if(ch.type==="line"){s+='<polyline fill="none" stroke="'+PAL[si%6]+'" stroke-width="2" points="'+sv.map((v,i)=>(L+bw*(i+.5))+','+(T+ih-ih*v/mx)).join(" ")+'"/>'}
+  else sv.forEach((v,i)=>{const w=bw*.8/ser.length;s+='<rect x="'+(L+bw*i+bw*.1+w*si)+'" y="'+(T+ih-ih*Math.max(0,v)/mx)+'" width="'+w+'" height="'+(ih*Math.max(0,v)/mx)+'" fill="'+PAL[si%6]+'"/>'})});
+ lab.forEach((t,i)=>{if(n<=12||i%Math.ceil(n/12)===0)s+='<text x="'+(L+bw*(i+.5))+'" y="'+(Hh-8)+'" font-size="10" text-anchor="middle" fill="currentColor">'+esc(t.slice(0,7))+'</text>'});return s+'</svg>'}
+function renderCharts(){ov.innerHTML=charts.map((ch,i)=>{let svg;try{svg=chartSVG(ch)}catch(_){svg="<div style='padding:10px'>Chart error</div>"}
+ return'<div class="chart" data-ci="'+i+'" style="left:'+ch.x+'px;top:'+ch.y+'px"><div class="ch"><span>'+({col:"Column",line:"Line",pie:"Pie"}[ch.type])+' chart ('+key(ch.rect[0],ch.rect[1])+':'+key(ch.rect[2],ch.rect[3])+')</span><span data-cx="'+i+'" style="cursor:pointer">✕</span></div>'+svg+'</div>'}).join("")}
+let cd=null;
+ov.addEventListener("pointerdown",e=>{const x=e.target.closest("[data-cx]");if(x){charts.splice(+x.dataset.cx,1);sync();render();return}const h=e.target.closest(".ch");if(!h)return;const p=h.parentElement,i=+p.dataset.ci;cd={i,p,sx:e.clientX,sy:e.clientY,x:charts[i].x,y:charts[i].y};h.setPointerCapture(e.pointerId)});
+ov.addEventListener("pointermove",e=>{if(!cd)return;charts[cd.i].x=cd.x+e.clientX-cd.sx;charts[cd.i].y=cd.y+e.clientY-cd.sy;cd.p.style.left=charts[cd.i].x+"px";cd.p.style.top=charts[cd.i].y+"px"});
+ov.addEventListener("pointerup",()=>{cd=null;sync()});
+function act(a,b){switch(a){
+ case"paste":doPaste();break;case"cut":doCopy(true);break;case"copy":doCopy(false);break;
+ case"b":case"i":case"u":applyFmt({[a]:!(fmt[key(...sel)]||{})[a]});break;
+ case"al-l":applyFmt({al:"left"});break;case"al-c":applyFmt({al:"center"});break;case"al-r":applyFmt({al:"right"});break;
+ case"bd":applyFmt({bd:1});break;case"nobd":applyFmt({bd:0});break;
+ case"dp+":dpAdj(1);break;case"dp-":dpAdj(-1);break;
+ case"rowi":axisOp(0,1);break;case"coli":axisOp(1,1);break;case"rowd":axisOp(0,-1);break;case"cold":axisOp(1,-1);break;
+ case"sum":autoSum();break;case"sortA":sortSel(true);break;case"sortZ":sortSel(false);break;case"clear":clearSel(true);break;
+ case"table":addTable();break;case"ch-col":addChart("col");break;case"ch-line":addChart("line");break;case"ch-pie":addChart("pie");break;
+ case"rg":rangeMode=!rangeMode;b.classList.toggle("on",rangeMode);break;
+ case"grid":gridOn=!gridOn;b.classList.toggle("on",gridOn);draw();break;
+ case"undo":undo();break;
+ case"new":if(confirm("Sab kuch naya shuru karna hai?")){push();S=[{n:"Sheet1",d:{},f:{},t:[],c:[]}];cur=0;bind();U=[];drawTabs();render()}break;
+ case"open":file.click();break;
+ case"save":sv();break;case"csv":csvOut();break}}
+fsz.onchange=()=>applyFmt({fs:+fsz.value});
+nfm.onchange=()=>applyFmt({nf:nfm.value,dp:undefined});
+fill.onchange=()=>applyFmt({bg:fill.value});fcol.onchange=()=>applyFmt({fg:fcol.value});
+document.addEventListener("mousedown",e=>{if(e.target.closest("button.rb,button.tb,.cl"))e.preventDefault()});
+document.addEventListener("click",e=>{const t=e.target.closest("[data-t]");if(t){document.querySelectorAll("#tabs button").forEach(x=>x.classList.toggle("on",x===t));document.querySelectorAll(".pn").forEach(p=>p.classList.toggle("on",p.dataset.p===t.dataset.t));return}
+ const b=e.target.closest("[data-a]");if(b){act(b.dataset.a,b);return}
+ const f=e.target.closest("[data-i]");if(f){if(!fxA){fx.focus();fx.setSelectionRange(fx.value.length,fx.value.length)}const s=f.dataset.i;if(s.length>1&&fx.value==="")fx.value="=";ins(s);say(H[s]||"")}});
+ok.onclick=()=>{fx.blur();select(sel[0]+1,sel[1])};
 vp.addEventListener("mousedown",e=>{moved=false;if(pointing()){e.preventDefault();return}const el=e.target.closest(".c");if(!el||e.button)return;const p=[+el.dataset.r,+el.dataset.c];if(e.shiftKey){ex=p;moved=true;selchg();e.preventDefault();return}drag=true;dragA=p});
 vp.addEventListener("mouseover",e=>{if(!drag)return;const el=e.target.closest(".c");if(!el)return;const p=[+el.dataset.r,+el.dataset.c];if(ex||p[0]!==dragA[0]||p[1]!==dragA[1]){sel=[...dragA];ex=p;moved=true;selchg()}});
 document.addEventListener("mouseup",()=>{drag=false});
-vp.addEventListener("click",e=>{const el=e.target.closest(".c");if(!el||moved)return;const r=+el.dataset.r,c=+el.dataset.c;
+vp.addEventListener("click",e=>{
+ const hc=e.target.closest("[data-hc]");if(hc){const c=+hc.dataset.hc;sel=[0,c];ex=[R-1,c];selchg();return}
+ const hr=e.target.closest("[data-hr]");if(hr){const r=+hr.dataset.hr;sel=[r,0];ex=[r,C-1];selchg();return}
+ const el=e.target.closest(".c");if(!el||moved)return;const r=+el.dataset.r,c=+el.dataset.c;
  if(pointing()){ins(key(r,c));return}
  if(rangeMode){ex=[r,c];selchg();return}
  const same=r===sel[0]&&c===sel[1];select(r,c);if(same)fx.focus()});
 vp.addEventListener("dblclick",()=>fx.focus());
-qk.addEventListener("mousedown",e=>e.preventDefault());
-qk.addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
- if(b.id==="undo"){undo();return}
- if(b.id==="rg"){rangeMode=!rangeMode;b.style.background=rangeMode?"var(--sel)":"";return}
- if(!fxA){fx.focus();fx.setSelectionRange(fx.value.length,fx.value.length)}
- const s=b.dataset.i;if(s.length>1&&fx.value==="")fx.value="=";ins(s);hint.textContent=H[s]||""});
-ok.onclick=()=>{fx.blur();select(sel[0]+1,sel[1])};
 document.addEventListener("keydown",e=>{
- if(e.target.tagName==="INPUT")return;
- const k=e.key;
- if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==="z"){undo();e.preventDefault();return}
+ if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT")return;
+ const k=e.key,m=e.ctrlKey||e.metaKey;
+ if(m){const l=k.toLowerCase();if(l==="z")undo();else if(l==="c")doCopy(false);else if(l==="x")doCopy(true);else if(l==="b"||l==="i"||l==="u")act(l);else return;e.preventDefault();return}
  const mv={ArrowDown:[1,0],ArrowUp:[-1,0],ArrowLeft:[0,-1],ArrowRight:[0,1]}[k];
  if(mv){if(e.shiftKey){const b=ex||sel;ex=[Math.max(0,Math.min(R-1,b[0]+mv[0])),Math.max(0,Math.min(C-1,b[1]+mv[1]))];selchg();reveal(...ex)}else select(sel[0]+mv[0],sel[1]+mv[1])}
- else if(k==="Delete"||k==="Backspace"){push();const[a,b,c,d]=rect();for(let r=a;r<=c;r++)for(let q=b;q<=d;q++)delete data[key(r,q)];render()}
+ else if(k==="Delete"||k==="Backspace")clearSel(false);
  else if(k==="Enter"||k==="F2"){fx.focus();fx.setSelectionRange(fx.value.length,fx.value.length)}
- else if(k.length===1&&!e.ctrlKey&&!e.metaKey){fx.focus();fx.value=k;dirty=true}
+ else if(k.length===1){fx.focus();fx.value=k;dirty=true}
  else return;
  e.preventDefault()});
-exp.onclick=()=>{
- let mr=0,mc=0;Object.keys(data).forEach(k=>{const p=parseRef(k);if(p){mr=Math.max(mr,p[0]);mc=Math.max(mc,p[1])}});
- if((mr+1)*(mc+1)>2000000){hint.textContent="Data bahut door door hai, CSV ke liye cells paas laao";return}
- const rows=[];for(let r=0;r<=mr;r++){const row=[];for(let c=0;c<=mc;c++){const v=String(val(key(r,c)));row.push(/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v)}rows.push(row.join(","))}
- saveFile("sheet.csv",rows.join("\n"),"text/csv","sheet.csv")};
-imp.onclick=()=>file.click();
+function csvOut(){let mr=0,mc=0;Object.keys(data).forEach(k=>{const p=parseRef(k);if(p){mr=Math.max(mr,p[0]);mc=Math.max(mc,p[1])}});
+ if((mr+1)*(mc+1)>2000000){say("Data bahut door door hai, CSV ke liye cells paas laao");return}
+ const rows=[];for(let r=0;r<=mr;r++){const row=[];for(let c=0;c<=mc;c++){const v=disp(val(key(r,c)),key(r,c));row.push(/[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v)}rows.push(row.join(","))}
+ saveFile("sheet.csv",rows.join("\n"),"text/csv","sheet.csv")}
+function sv(){saveFile("sheet.lokesh",JSON.stringify(payload(),null,1),"application/json","sheet.lokesh.json")}
+function loadLK(txt){try{const j=JSON.parse(txt);if(j.format!=="LOKESH"&&j.format!=="MSHEET")throw 0;push();
+ if(j.sheets){S=j.sheets.map(s=>({n:s.name||"Sheet",d:s.cells||{},f:s.fmt||{},t:s.tables||[],c:s.charts||[]}));cur=0}else S[cur].d=j.cells||{};
+ bind();sel=[0,0];ex=null;drawTabs();render();say("File khul gayi")}catch(_){say("Ye valid .lokesh file nahi hai")}}
+window.lkCheck=async()=>{try{if(window.LK){const b=await LK.take();if(b)loadLK(new TextDecoder().decode(Uint8Array.from(atob(b),c=>c.charCodeAt(0))))}}catch(_){}};
 file.onchange=()=>{const f=file.files[0];if(!f)return;
  f.text().then(txt=>{
-  if(/\.(lokesh|msheet|json)$/i.test(f.name)){try{const j=JSON.parse(txt);if(j.format!=="LOKESH"&&j.format!=="MSHEET")throw 0;push();data=j.cells||{};render()}catch(_){hint.textContent="Ye valid .lokesh file nahi hai"}return}
-  push();data={};
+  if(/\.(lokesh|msheet|json)$/i.test(f.name)){loadLK(txt);return}
+  push();data={};S[cur].d=data;fmt={};S[cur].f=fmt;
   txt.split(/\r?\n/).forEach((line,r)=>{const cells=line.match(/("([^"]|"")*"|[^,]*)(,|$)/g)||[];
    cells.forEach((s,c)=>{s=s.replace(/,$/,"");if(s[0]==='"')s=s.slice(1,-1).replace(/""/g,'"');if(s!==""&&r<R&&c<C)data[key(r,c)]=s})});
   render()});file.value=""};
-clr.onclick=()=>{push();data={};render()};
-sv.onclick=()=>{const j={format:"LOKESH",version:1,app:"MiniSheet",saved:new Date().toISOString(),rows:R,cols:C,cells:data};saveFile("sheet.lokesh",JSON.stringify(j,null,1),"application/json","sheet.lokesh.json")};
 let raf=0;wrap.addEventListener("scroll",()=>{if(!raf)raf=requestAnimationFrame(()=>{raf=0;draw()})});
 new ResizeObserver(()=>{layout();draw()}).observe(wrap);
-try{data=JSON.parse(localStorage.getItem("ms")||"{}")}catch(_){}
-function loadLK(txt){try{const j=JSON.parse(txt);if(j.format!=="LOKESH"&&j.format!=="MSHEET")throw 0;push();data=j.cells||{};render();hint.textContent="File khul gayi"}catch(_){hint.textContent="Ye valid .lokesh file nahi hai"}}
-window.lkCheck=async()=>{try{if(window.LK){const b=await LK.take();if(b)loadLK(new TextDecoder().decode(Uint8Array.from(atob(b),c=>c.charCodeAt(0))))}}catch(_){}};
-setTimeout(lkCheck,400);setTimeout(lkCheck,1500);
-layout();render();
+try{const j=JSON.parse(localStorage.getItem("ms2")||"null");if(j&&j.sheets){S=j.sheets.map(s=>({n:s.name,d:s.cells||{},f:s.fmt||{},t:s.tables||[],c:s.charts||[]}));bind()}else{const o=JSON.parse(localStorage.getItem("ms")||"null");if(o){S[0].d=o;bind()}}}catch(_){}
+drawTabs();layout();render();setTimeout(lkCheck,400);setTimeout(lkCheck,1500);
 </script>
 </body>
 </html>
