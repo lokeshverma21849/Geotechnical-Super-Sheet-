@@ -8,8 +8,7 @@ f = r'''
 <category android:name="android.intent.category.BROWSABLE"/>
 <data android:scheme="content"/>
 <data android:scheme="file"/>
-<data android:mimeType="application/octet-stream"/>
-<data android:mimeType="application/json"/>
+<data android:mimeType="*/*"/>
 </intent-filter>
 <intent-filter>
 <action android:name="android.intent.action.VIEW"/>
